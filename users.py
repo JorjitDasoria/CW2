@@ -1,9 +1,24 @@
-from flask import abort, make_response
+from flask import request, abort, make_response
 from config import db
 from models import User, user_schema, users_schema
 
 
 
+
+
+def get_requester_role():
+    
+    requester_id = request.headers.get('X-User-ID')
+    
+    if not requester_id:
+        return None
+
+    user = User.query.get(requester_id)
+    
+    if user and user.role:
+        return user.role.role_name.lower()
+    
+    return None
 
 def read_all():
     users = User.query.all()

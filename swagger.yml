@@ -129,9 +129,18 @@ paths:
       summary: "Delete a user"
       parameters:
         - $ref: "#/components/parameters/user_id"
+
+        - name: "X-User-ID"
+          in: header
+          description: "ID of the requester (Use 1 for Admin, others for Guest)"
+          required: false
+          schema:
+            type: "integer"
       responses:
         "204":
           description: "Successfully deleted user"
+        "403":
+          description: "Permission Denied: Only administrators can delete users"
   
 
 
