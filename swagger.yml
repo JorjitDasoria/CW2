@@ -17,13 +17,18 @@ components:
         - email
         - role_id
         - location_id
+        
       properties:
+        user_id:
+          type: "integer"
+          readOnly: true
         first_name:
           type: "string"
         last_name:
           type: "string"
         email:
           type: "string"
+          format: "email"
         phone_number:
           type: "string"
         role_id:
@@ -66,6 +71,27 @@ components:
         activity_name:
           type: "string"
           example: "biking"
+    
+    Location:
+      type: "object"
+      required:
+        - location_name
+        - default_units
+        - default_language
+      properties:
+        location_id:
+          type: "integer"
+          readOnly: true
+        location_name:
+          type: "string"
+          example: "Plymouth, Devon"
+        default_units:
+          type: "string"
+          enum: ["Metric", "Imperial"]
+          example: "Metric"
+        default_language:
+          type: "string"
+          example: "en"
 
   parameters:
     user_id:
@@ -75,6 +101,7 @@ components:
       required: True
       schema:
         type: "integer"
+  
 
 paths:
   /users:
@@ -82,19 +109,39 @@ paths:
       operationId: "users.read_all"
       tags:
         - "Users"
-      summary: "Read the list of users"
+      summary: "Read list of users (Password hidden for non-Admins)"
+      parameters:
+        - name: "X-User-ID"
+          in: header
+          description: "ID of requester (Admin sees password; User does not)"
+          required: false
+          schema:
+            type: "integer"
       responses:
         "200":
           description: "Successfully fetched users"
-    
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/User"
+
     post:
       operationId: "users.create"
       tags:
-        - Users
-      summary: "Create a new user"
+        - "Users"
+      summary: "Create a new user (Admin Only)"
+      parameters:
+        - name: "X-User-ID"
+          in: header
+          description: "ID of requester (Must be Admin)"
+          required: false
+          schema:
+            type: "integer"
       requestBody:
         description: "User to create"
-        required: True
+        required: true
         content:
           application/json:
             schema:
@@ -103,15 +150,29 @@ paths:
       responses:
         "201":
           description: "Successfully created user"
-          
+        "403":
+          description: "Permission Denied: Only administrators can create users"
+        "406":
+          description: "User with this email already exists"
+
   /users/{user_id}:
     get:
       operationId: "users.read_one"
       tags:
-        - Users
-      summary: "Read one user by ID"
+        - "Users"
+      summary: "Read one user (Password hidden for non-Admins)"
       parameters:
-        - $ref: "#/components/parameters/user_id"
+        - name: "user_id"
+          in: path
+          required: true
+          schema:
+            type: "integer"
+        - name: "X-User-ID"
+          in: header
+          description: "ID of requester (Admin sees password; User does not)"
+          required: false
+          schema:
+            type: "integer"
       responses:
         "200":
           description: "Successfully read user"
@@ -119,12 +180,22 @@ paths:
           description: "User not found"
     
     put:
-      tags:
-        - Users
       operationId: "users.update"
-      summary: "Update a user"
+      tags:
+        - "Users"
+      summary: "Update a user (Admin Only)"
       parameters:
-        - $ref: "#/components/parameters/user_id"
+        - name: "user_id"
+          in: path
+          required: true
+          schema:
+            type: "integer"
+        - name: "X-User-ID"
+          in: header
+          description: "ID of requester (Must be Admin)"
+          required: false
+          schema:
+            type: "integer"
       requestBody:
         content:
           application/json:
@@ -134,18 +205,25 @@ paths:
       responses:
         "200":
           description: "Successfully updated user"
+        "403":
+          description: "Permission Denied"
+        "404":
+          description: "User not found"
 
     delete:
-      tags:
-        - Users
       operationId: "users.delete"
-      summary: "Delete a user"
+      tags:
+        - "Users"
+      summary: "Delete a user (Admin Only)"
       parameters:
-        - $ref: "#/components/parameters/user_id"
-
+        - name: "user_id"
+          in: path
+          required: true
+          schema:
+            type: "integer"
         - name: "X-User-ID"
           in: header
-          description: "ID of the requester (Use 1 for Admin, others for Guest)"
+          description: "ID of requester (Must be Admin)"
           required: false
           schema:
             type: "integer"
@@ -153,7 +231,9 @@ paths:
         "204":
           description: "Successfully deleted user"
         "403":
-          description: "Permission Denied: Only administrators can delete users"
+          description: "Permission Denied"
+        "404":
+          description: "User not found"
   
   /users/{user_id}/activities:
     post:
@@ -433,3 +513,124 @@ paths:
           description: "Permission Denied"
         "404":
           description: "Activity not found"
+  
+
+  /locations:
+    get:
+      operationId: "location.read_all"
+      tags:
+        - "Locations"
+      summary: "Read the list of all locations"
+      responses:
+        "200":
+          description: "Successfully fetched locations"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Location"
+    
+    post:
+      operationId: "location.create"
+      tags:
+        - "Locations"
+      summary: "Create a new location (Admin Only)"
+      parameters:
+        - name: "X-User-ID"
+          in: header
+          description: "ID of the requester (Admin check)"
+          required: false
+          schema:
+            type: "integer"
+      requestBody:
+        description: "Location to create"
+        required: true
+        content:
+          application/json:
+            schema:
+              x-body-name: "location_data"
+              $ref: "#/components/schemas/Location"
+      responses:
+        "201":
+          description: "Successfully created location"
+        "403":
+          description: "Permission Denied"
+        "406":
+          description: "Location already exists"
+
+  /locations/{location_id}:
+    get:
+      operationId: "location.read_one"
+      tags:
+        - "Locations"
+      summary: "Read one location"
+      parameters:
+        - name: "location_id"
+          in: path
+          required: true
+          schema:
+            type: "integer"
+      responses:
+        "200":
+          description: "Successfully read location"
+        "404":
+          description: "Location not found"
+    
+    put:
+      operationId: "location.update"
+      tags:
+        - "Locations"
+      summary: "Update a location (Admin Only)"
+      parameters:
+        - name: "location_id"
+          in: path
+          required: true
+          schema:
+            type: "integer"
+        - name: "X-User-ID"
+          in: header
+          description: "ID of the requester (Admin check)"
+          required: false
+          schema:
+            type: "integer"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              x-body-name: "location_data"
+              $ref: "#/components/schemas/Location"
+      responses:
+        "200":
+          description: "Successfully updated location"
+        "403":
+          description: "Permission Denied"
+        "404":
+          description: "Location not found"
+
+    delete:
+      operationId: "location.delete"
+      tags:
+        - "Locations"
+      summary: "Delete a location (Admin Only)"
+      parameters:
+        - name: "location_id"
+          in: path
+          required: true
+          schema:
+            type: "integer"
+        - name: "X-User-ID"
+          in: header
+          description: "ID of the requester (Admin check)"
+          required: false
+          schema:
+            type: "integer"
+      responses:
+        "204":
+          description: "Successfully deleted location"
+        "403":
+          description: "Permission Denied"
+        "404":
+          description: "Location not found"
+        "409":
+          description: "Cannot delete: Users still assigned to this location"

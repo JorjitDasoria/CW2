@@ -45,7 +45,6 @@ TEST_USERS = [
         "first_name": "Tim", "last_name": "Berners-Lee", "email": "tim@example.com",
         "phone_number": "0123456789", "about_me": "I invented the web.", "password": "hashed_secret_password",
         "activity_time_preference": "pace", "height": 1.80, "weight": 75.50, "birthday": date(1955, 6, 8),
-        # Must match exact keys in TEST_ROLES and TEST_LOCATIONS
         "role_name": "general user",
         "location_name": "Plymouth, Devon, England", "location_units": "Metric",
         "activities": ["Running", "Road biking"]
@@ -63,7 +62,7 @@ TEST_USERS = [
         "phone_number": "07700900456", "about_me": "Running implies computing.", "password": "enigma_code",
         "activity_time_preference": "pace", "height": 1.78, "weight": 70.20, "birthday": date(1912, 6, 23),
         "role_name": "general user",
-        "location_name": "England", "location_units": "Imperial", # Matches the Imperial version of England
+        "location_name": "England", "location_units": "Imperial", 
         "activities": ["Running", "Cross-Country skiing"]
     },
     {
@@ -87,7 +86,7 @@ TEST_USERS = [
         "phone_number": "07700900000", "about_me": "Software engineering pioneer.", "password": "apollo_11",
         "activity_time_preference": "speed", "height": 1.70, "weight": 62.00, "birthday": date(1936, 8, 17),
         "role_name": "administrator",
-        "location_name": "England", "location_units": "Metric", # Matches the Metric version of England
+        "location_name": "England", "location_units": "Metric",
         "activities": ["Hiking", "Rock climbing", "Mountain biking"]
     }
 ]
