@@ -54,6 +54,19 @@ components:
         role_name:
           type: "string"
 
+    
+    Activity:
+      type: "object"
+      required:
+        - activity_name
+      properties:
+        activity_id:
+          type: "integer"
+          readOnly: true
+        activity_name:
+          type: "string"
+          example: "biking"
+
   parameters:
     user_id:
       name: "user_id"
@@ -141,6 +154,71 @@ paths:
           description: "Successfully deleted user"
         "403":
           description: "Permission Denied: Only administrators can delete users"
+  
+  /users/{user_id}/activities:
+    post:
+      operationId: "user_activities.add_favorite"
+      tags:
+        - "User Favorites"
+      summary: "Add an activity to a user's favorites"
+      parameters:
+        - name: "user_id"
+          in: path
+          required: true
+          schema:
+            type: "integer"
+        - name: "X-User-ID"
+          in: header
+          description: "ID of requester (Must match user_id or be Admin)"
+          required: true
+          schema:
+            type: "integer"
+      requestBody:
+        description: "ID of the activity to add"
+        required: true
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                activity_id:
+                  type: "integer"
+      responses:
+        "201":
+          description: "Activity added successfully"
+        "409":
+          description: "Activity already in list"
+        "403":
+          description: "Permission Denied"
+
+  /users/{user_id}/activities/{activity_id}:
+    delete:
+      operationId: "user_activities.remove_favorite"
+      tags:
+        - "User Favorites"
+      summary: "Remove an activity from a user's favorites"
+      parameters:
+        - name: "user_id"
+          in: path
+          required: true
+          schema:
+            type: "integer"
+        - name: "activity_id"
+          in: path
+          required: true
+          schema:
+            type: "integer"
+        - name: "X-User-ID"
+          in: header
+          description: "ID of requester (Must match user_id or be Admin)"
+          required: true
+          schema:
+            type: "integer"
+      responses:
+        "204":
+          description: "Activity removed successfully"
+        "403":
+          description: "Permission Denied"
   
 
 
@@ -236,3 +314,122 @@ paths:
           description: "Successfully deleted role"
         "404":
           description: "Role not found"
+  
+
+  /activities:
+    get:
+      operationId: "activities.read_all"
+      tags:
+        - "Activities"
+      summary: "Read the list of all activities"
+      responses:
+        "200":
+          description: "Successfully fetched activities"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Activity"
+    
+    post:
+      operationId: "activities.create"
+      tags:
+        - "Activities"
+      summary: "Create a new activity (Admin Only)"
+      parameters:
+        - name: "X-User-ID"
+          in: header
+          description: "ID of the requester (Admin check)"
+          required: false
+          schema:
+            type: "integer"
+      requestBody:
+        description: "Activity to create"
+        required: true
+        content:
+          application/json:
+            schema:
+              x-body-name: "activity_data"
+              $ref: "#/components/schemas/Activity"
+      responses:
+        "201":
+          description: "Successfully created activity"
+        "403":
+          description: "Permission Denied"
+        "406":
+          description: "Activity already exists"
+
+  /activities/{activity_id}:
+    get:
+      operationId: "activities.read_one"
+      tags:
+        - "Activities"
+      summary: "Read one activity"
+      parameters:
+        - name: "activity_id"
+          in: path
+          required: true
+          schema:
+            type: "integer"
+      responses:
+        "200":
+          description: "Successfully read activity"
+        "404":
+          description: "Activity not found"
+    
+    put:
+      operationId: "activities.update"
+      tags:
+        - "Activities"
+      summary: "Update an activity (Admin Only)"
+      parameters:
+        - name: "activity_id"
+          in: path
+          required: true
+          schema:
+            type: "integer"
+        - name: "X-User-ID"
+          in: header
+          description: "ID of the requester (Admin check)"
+          required: false
+          schema:
+            type: "integer"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              x-body-name: "activity_data"
+              $ref: "#/components/schemas/Activity"
+      responses:
+        "200":
+          description: "Successfully updated activity"
+        "403":
+          description: "Permission Denied"
+        "404":
+          description: "Activity not found"
+
+    delete:
+      operationId: "activities.delete"
+      tags:
+        - "Activities"
+      summary: "Delete an activity (Admin Only)"
+      parameters:
+        - name: "activity_id"
+          in: path
+          required: true
+          schema:
+            type: "integer"
+        - name: "X-User-ID"
+          in: header
+          description: "ID of the requester (Admin check)"
+          required: false
+          schema:
+            type: "integer"
+      responses:
+        "204":
+          description: "Successfully deleted activity"
+        "403":
+          description: "Permission Denied"
+        "404":
+          description: "Activity not found"
