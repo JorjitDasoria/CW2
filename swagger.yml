@@ -92,6 +92,24 @@ components:
         default_language:
           type: "string"
           example: "en"
+    
+    UserLog:
+      type: "object"
+      properties:
+        log_id:
+          type: "integer"
+          readOnly: true
+        user_id_added:
+          type: "integer"
+        first_name_added:
+          type: "string"
+        last_name_added:
+          type: "string"
+        email_added:
+          type: "string"
+        timestamp_added:
+          type: "string"
+          format: "date-time"
 
   parameters:
     user_id:
@@ -600,3 +618,41 @@ paths:
           description: "Location not found"
         "409":
           description: "Cannot delete: Users still assigned to this location"
+
+  /user_logs:
+    get:
+      operationId: "user_logs.read_all"
+      tags:
+        - "trigger Logs"
+      summary: "Read audit logs (Admin Only)"
+      responses:
+        "200":
+          description: "Successfully fetched logs"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/UserLog"
+        "403":
+           description: "Permission Denied"
+
+  /user_logs/{log_id}:
+    get:
+      operationId: "user_logs.read_one"
+      tags:
+        - "Audit Logs"
+      summary: "Read one log entry"
+      parameters:
+        - name: "log_id"
+          in: path
+          required: true
+          schema:
+            type: "integer"
+      responses:
+        "200":
+          description: "Successfully read log"
+        "403":
+           description: "Permission Denied"
+        "404":
+          description: "Log not found"

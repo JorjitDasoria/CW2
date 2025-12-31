@@ -1,5 +1,6 @@
 from marshmallow_sqlalchemy import fields
 from config import db, ma
+from datetime import datetime, timezone
 
 
 user_activity = db.Table('user_activity',
@@ -55,6 +56,18 @@ class User(db.Model):
     location = db.relationship("Location")
     activities = db.relationship("Activity", secondary=user_activity, backref="users")
 
+class UserLog(db.Model):
+    __tablename__ = 'user_log'
+    __table_args__ = {"schema": "CW2"}
+
+    log_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id_added = db.Column(db.Integer, nullable=False)
+    first_name_added = db.Column(db.String(50))
+    last_name_added = db.Column(db.String(50))
+    email_added = db.Column(db.String(100))
+    ##timestamp_added = db.Column(db.DateTime, default=datetime.now(datetime.timezone.utc))
+    timestamp_added = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
 # --- SCHEMAS ---
 
 class RoleSchema(ma.SQLAlchemyAutoSchema):
@@ -88,3 +101,13 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
 
 user_schema = UserSchema()
 users_schema = UserSchema(many=True)
+
+class UserLogSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = UserLog
+        load_instance = True
+        sqla_session = db.session
+
+
+user_log_schema = UserLogSchema()
+user_logs_schema = UserLogSchema(many=True)

@@ -1,7 +1,7 @@
 from flask import request, abort, make_response
 from flask import session
 from config import db
-from models import User, user_schema, users_schema
+from models import User, UserLog, user_schema, users_schema
 
 def get_requester_role():
     return session.get('role', 'guest')
@@ -21,7 +21,7 @@ def read_all():
     requester_role = get_requester_role()
 
     print(f"DEBUG: The API sees your role as: '{requester_role}'")
-    
+
     users = User.query.all()
     all_data = users_schema.dump(users)
     
@@ -49,8 +49,21 @@ def create(user_data):
         abort(406, f"User with email {email} already exists")
 
     new_user = user_schema.load(user_data, session=db.session)
+    if user_data.get('password'):
+        new_user.set_password(user_data.get('password'))
+    
     db.session.add(new_user)
+    db.session.flush()
+
+    new_log = UserLog(
+        user_id_added=new_user.user_id,
+        first_name_added=new_user.first_name,
+        last_name_added=new_user.last_name,
+        email_added=new_user.email
+    )
+    db.session.add(new_log)
     db.session.commit()
+
     return user_schema.dump(new_user), 201
 
 def update(user_id, user_data):
