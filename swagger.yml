@@ -104,19 +104,43 @@ components:
   
 
 paths:
+  /login:
+    post:
+      operationId: "auth.login"
+      tags:
+        - "Auth"
+      summary: "Login"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        "200":
+          description: "Login Successful"
+  /logout:
+    post:
+      operationId: "auth.logout"
+      tags:
+        - "Auth"
+      summary: "Logout"
+      responses:
+        "200":
+          description: "Logged out"
+
+
   /users:
     get:
       operationId: "users.read_all"
       tags:
         - "Users"
       summary: "Read list of users (Password hidden for non-Admins)"
-      parameters:
-        - name: "X-User-ID"
-          in: header
-          description: "ID of requester (Admin sees password; User does not)"
-          required: false
-          schema:
-            type: "integer"
+
       responses:
         "200":
           description: "Successfully fetched users"
@@ -132,13 +156,7 @@ paths:
       tags:
         - "Users"
       summary: "Create a new user (Admin Only)"
-      parameters:
-        - name: "X-User-ID"
-          in: header
-          description: "ID of requester (Must be Admin)"
-          required: false
-          schema:
-            type: "integer"
+
       requestBody:
         description: "User to create"
         required: true
@@ -167,12 +185,7 @@ paths:
           required: true
           schema:
             type: "integer"
-        - name: "X-User-ID"
-          in: header
-          description: "ID of requester (Admin sees password; User does not)"
-          required: false
-          schema:
-            type: "integer"
+        
       responses:
         "200":
           description: "Successfully read user"
@@ -190,12 +203,7 @@ paths:
           required: true
           schema:
             type: "integer"
-        - name: "X-User-ID"
-          in: header
-          description: "ID of requester (Must be Admin)"
-          required: false
-          schema:
-            type: "integer"
+        
       requestBody:
         content:
           application/json:
@@ -221,12 +229,7 @@ paths:
           required: true
           schema:
             type: "integer"
-        - name: "X-User-ID"
-          in: header
-          description: "ID of requester (Must be Admin)"
-          required: false
-          schema:
-            type: "integer"
+        
       responses:
         "204":
           description: "Successfully deleted user"
@@ -247,12 +250,7 @@ paths:
           required: true
           schema:
             type: "integer"
-        - name: "X-User-ID"
-          in: header
-          description: "ID of requester (Must match user_id or be Admin)"
-          required: true
-          schema:
-            type: "integer"
+        
       requestBody:
         description: "ID of the activity to add"
         required: true
@@ -288,12 +286,7 @@ paths:
           required: true
           schema:
             type: "integer"
-        - name: "X-User-ID"
-          in: header
-          description: "ID of requester (Must match user_id or be Admin)"
-          required: true
-          schema:
-            type: "integer"
+        
       responses:
         "204":
           description: "Activity removed successfully"
@@ -417,13 +410,7 @@ paths:
       tags:
         - "Activities"
       summary: "Create a new activity (Admin Only)"
-      parameters:
-        - name: "X-User-ID"
-          in: header
-          description: "ID of the requester (Admin check)"
-          required: false
-          schema:
-            type: "integer"
+      
       requestBody:
         description: "Activity to create"
         required: true
@@ -469,12 +456,7 @@ paths:
           required: true
           schema:
             type: "integer"
-        - name: "X-User-ID"
-          in: header
-          description: "ID of the requester (Admin check)"
-          required: false
-          schema:
-            type: "integer"
+        
       requestBody:
         content:
           application/json:
@@ -500,12 +482,7 @@ paths:
           required: true
           schema:
             type: "integer"
-        - name: "X-User-ID"
-          in: header
-          description: "ID of the requester (Admin check)"
-          required: false
-          schema:
-            type: "integer"
+        
       responses:
         "204":
           description: "Successfully deleted activity"
@@ -536,13 +513,7 @@ paths:
       tags:
         - "Locations"
       summary: "Create a new location (Admin Only)"
-      parameters:
-        - name: "X-User-ID"
-          in: header
-          description: "ID of the requester (Admin check)"
-          required: false
-          schema:
-            type: "integer"
+      
       requestBody:
         description: "Location to create"
         required: true
@@ -619,12 +590,7 @@ paths:
           required: true
           schema:
             type: "integer"
-        - name: "X-User-ID"
-          in: header
-          description: "ID of the requester (Admin check)"
-          required: false
-          schema:
-            type: "integer"
+        
       responses:
         "204":
           description: "Successfully deleted location"

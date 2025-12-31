@@ -1,15 +1,10 @@
 from flask import request, abort, make_response
+from flask import session
 from config import db
 from models import User, user_schema, users_schema
 
 def get_requester_role():
-    requester_id = request.headers.get('X-User-ID')
-    if not requester_id:
-        return 'guest'
-    user = User.query.get(requester_id)
-    if user and user.role:
-        return user.role.role_name.lower()
-    return 'guest'
+    return session.get('role', 'guest')
 
 
 def filter_user_data(user_data, requester_role):
@@ -24,6 +19,9 @@ def filter_user_data(user_data, requester_role):
 
 def read_all():
     requester_role = get_requester_role()
+
+    print(f"DEBUG: The API sees your role as: '{requester_role}'")
+    
     users = User.query.all()
     all_data = users_schema.dump(users)
     
