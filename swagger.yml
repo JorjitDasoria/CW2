@@ -111,6 +111,26 @@ components:
           type: "string"
           format: "date-time"
 
+    SavedTrail:
+      type: object
+      required:
+        - trail_id
+      properties:
+        saved_id:
+          type: integer
+          readOnly: true
+        user_id:
+          type: integer
+          readOnly: true
+        trail_id:
+          type: integer
+          description: "The ID of the trail from the external TrailService"
+        saved_date:
+          type: string
+          format: "date-time"
+          readOnly: true
+
+
   parameters:
     user_id:
       name: "user_id"
@@ -119,6 +139,8 @@ components:
       required: True
       schema:
         type: "integer"
+    
+
   
 
 paths:
@@ -255,6 +277,80 @@ paths:
           description: "Permission Denied"
         "404":
           description: "User not found"
+  
+  /users/{user_id}/saved_trails:
+    get:
+      operationId: "saved_trails.read_all"
+      tags:
+        - "Saved Trails"
+      summary: "Get list of trails saved by a user"
+      parameters:
+        - name: "user_id"
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SavedTrail"
+        "401":
+          description: "Not logged in"
+
+    post:
+      operationId: "saved_trails.add_trail"
+      tags:
+        - "Saved Trails"
+      summary: "Save a trail to profile"
+      parameters:
+        - name: "user_id"
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                trail_id:
+                  type: integer
+      responses:
+        "201":
+          description: "Trail saved"
+        "409":
+          description: "Trail already saved"
+
+  /users/{user_id}/saved_trails/{trail_id}:
+    delete:
+      operationId: "saved_trails.remove_trail"
+      tags:
+        - "Saved Trails"
+      summary: "Remove a saved trail"
+      parameters:
+        - name: "user_id"
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: "trail_id"
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: "Trail removed"
+        "404":
+          description: "Trail not found in list"
+
   
   /users/{user_id}/activities:
     post:

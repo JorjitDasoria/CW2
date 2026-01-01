@@ -9,6 +9,16 @@ user_activity = db.Table('user_activity',
     schema='CW2' 
 )
 
+class SavedTrail(db.Model):
+    __tablename__ = 'saved_trail'
+    __table_args__ = {"schema": "CW2"}
+
+    saved_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('CW2.user.user_id'), nullable=False)
+    trail_id = db.Column(db.Integer, nullable=False)
+    saved_date = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    user = db.relationship('User', backref=db.backref('saved_trails', lazy=True))
+
 class Role(db.Model):
     __tablename__ = 'role'
     __table_args__ = {"schema": "CW2"} 
@@ -68,7 +78,17 @@ class UserLog(db.Model):
     ##timestamp_added = db.Column(db.DateTime, default=datetime.now(datetime.timezone.utc))
     timestamp_added = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
-# --- SCHEMAS ---
+#SCHEMAS
+
+class SavedTrailSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = SavedTrail
+        load_instance = True
+        sqla_session = db.session
+        include_fk = True
+
+saved_trail_schema = SavedTrailSchema()
+saved_trails_schema = SavedTrailSchema(many=True)
 
 class RoleSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
