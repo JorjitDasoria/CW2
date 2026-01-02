@@ -356,15 +356,14 @@ paths:
     post:
       operationId: "user_activities.add_favorite"
       tags:
-        - "User Favorites"
+        - "User Activity"
       summary: "Add an activity to a user's favorites"
       parameters:
         - name: "user_id"
           in: path
           required: true
           schema:
-            type: "integer"
-        
+            type: "integer"  
       requestBody:
         description: "ID of the activity to add"
         required: true
